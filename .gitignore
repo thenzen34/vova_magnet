@@ -4,5 +4,5 @@
 # python cache files
 __pycache__
 
-venv
+venv*
 *.magnets34
