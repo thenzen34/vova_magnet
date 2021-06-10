@@ -1,3 +1,5 @@
+from random import shuffle
+
 from Scene.magnet_scene_GL import *
 
 from floodfill import PointDataItem, FloodFill, timing
@@ -8,6 +10,10 @@ class LavaGameScene(FloodFill):
     queue = []
 
     timer_interval = 1
+    diff_size_data = 1000
+    water_index = 70
+    per_tick = 50
+    shuffle_step = True
 
     def gl_key_pressed(self, *args):
         super().gl_key_pressed(*args)
@@ -20,7 +26,8 @@ class LavaGameScene(FloodFill):
         # while True:
         #     if self.add_random_point():
         #         break
-        self.add_random_point()
+        for i in range(self.per_tick):
+            self.add_random_point()
         self.draw_obj()
         if len(self.queue) > 0:
             glutTimerFunc(self.timer_interval, self.timer_callback, el + 1)  # 0 - command
@@ -46,7 +53,7 @@ class LavaGameScene(FloodFill):
 
     def set_item(self, x, y, items):
         value = NOTHING
-        if randint(0, 100 - 1) > 100:
+        if randint(0, 100 - 1) > self.water_index:
             value = WATER
         else:
             length = len(items)
@@ -117,22 +124,26 @@ class LavaGameScene(FloodFill):
             #     self.queue.clear()
             #     return True
 
-            self.add_to_queue(x - 1, y - 1)
-            self.add_to_queue(x - 1, y)
-            self.add_to_queue(x - 1, y + 1)
-            self.add_to_queue(x, y + 1)
-            self.add_to_queue(x + 1, y + 1)
-            self.add_to_queue(x + 1, y)
-            self.add_to_queue(x + 1, y - 1)
-            self.add_to_queue(x, y - 1)
+            all_steps = []
+            all_steps.append((x - 1, y - 1))
+            all_steps.append((x - 1, y))
+            all_steps.append((x - 1, y + 1))
+            all_steps.append((x, y + 1))
+            all_steps.append((x + 1, y + 1))
+            all_steps.append((x + 1, y))
+            all_steps.append((x + 1, y - 1))
+            all_steps.append((x, y - 1))
+
+            if self.shuffle_step:
+                shuffle(all_steps)
+
+            for step in all_steps:
+                self.add_to_queue(*step)
 
         return False
 
     def init(self):
-        x = randint(0, 64 - 1)
-        y = randint(0, 48 - 1)
-
-        self.add_to_queue(x, y)
+        self.add_to_queue(0, 0)
 
         super(FloodFill, self).init()
 
